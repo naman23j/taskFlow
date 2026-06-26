@@ -35,7 +35,7 @@ async function suggestEstimate(taskTitle, taskDescription) {
   const provider = (process.env.LLM_API_PROVIDER || 'gemini').toLowerCase();
   const prompt = buildEstimatePrompt(taskTitle, taskDescription);
 
-  if (!apiKey) {
+  if (!apiKey || apiKey === 'your-llm-api-key' || apiKey.startsWith('your-')) {
     const error = new Error('AI feature unavailable');
     error.code = 'AI_KEY_MISSING';
     throw error;

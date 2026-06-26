@@ -1,12 +1,73 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
 import { useBoard } from '../../context/BoardContext';
-import { Badge, Button, PageShell, Section, Stack, SubtleText, Toolbar } from '../shared/ui';
+import { Badge, Button, PageShell, Section, Stack, SubtleText, Toolbar, Select } from '../shared/ui';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import ErrorAlert from '../shared/ErrorAlert';
 import CreateTaskModal from '../tasks/CreateTaskModal';
 import TaskColumn from '../tasks/TaskColumn';
 import TaskDetailView from '../tasks/TaskDetailView';
+
+const BoardHeaderSection = styled(Section)`
+  background: ${({ theme }) =>
+    theme.name === 'dark'
+      ? 'linear-gradient(135deg, #09090b 0%, #18181b 100%)'
+      : 'linear-gradient(135deg, #ffffff 0%, #f4f4f5 100%)'};
+  position: relative;
+  overflow: hidden;
+`;
+
+const FilterBar = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const FilterSelect = styled.select`
+  border: 1.5px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.text};
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+  min-height: 36px;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.colors.text};
+  }
+
+  option {
+    background: ${({ theme }) => theme.colors.surface};
+    color: ${({ theme }) => theme.colors.text};
+  }
+`;
+
+const BoardTitle = styled.h1`
+  margin: 0;
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+`;
+
+const ColumnGrid = styled.div`
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+`;
 
 function BoardView() {
   const { boardId } = useParams();
@@ -67,81 +128,110 @@ function BoardView() {
 
   return (
     <PageShell>
-      <Section>
+      <BoardHeaderSection>
         {loading ? (
           <Stack style={{ justifyItems: 'center', padding: '32px 0' }}>
             <LoadingSpinner />
-            <SubtleText>Loading board...</SubtleText>
+            <SubtleText>Loading board…</SubtleText>
           </Stack>
         ) : null}
         <ErrorAlert message={error} />
         {currentBoard ? (
-          <Stack>
+          <Stack style={{ gap: '16px' }}>
             <Toolbar>
-              <Stack>
-                <h1 style={{ margin: 0 }}>{currentBoard.title}</h1>
+              <Stack style={{ gap: '6px' }}>
+                <BoardTitle>{currentBoard.title}</BoardTitle>
                 <SubtleText>{currentBoard.description || 'No description provided.'}</SubtleText>
               </Stack>
-              <Button type="button" onClick={() => { setEditingTask(null); setTaskModalOpen(true); }}>
-                Create Task
+              <Button
+                type="button"
+                onClick={() => { setEditingTask(null); setTaskModalOpen(true); }}
+                id="create-task-btn"
+                style={{ minHeight: '44px', minWidth: '130px' }}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add Task
               </Button>
             </Toolbar>
-            <Toolbar>
-              <Badge>{currentBoard.taskCount || tasks.length} tasks</Badge>
-              <select value={filters.status} onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value }))}>
+
+            <FilterBar>
+              <Badge>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                </svg>
+                {currentBoard.taskCount || tasks.length} tasks
+              </Badge>
+              <FilterSelect
+                value={filters.status}
+                onChange={(e) => setFilters((c) => ({ ...c, status: e.target.value }))}
+              >
                 <option value="">All Statuses</option>
                 <option value="todo">To Do</option>
                 <option value="in-progress">In Progress</option>
                 <option value="done">Done</option>
-              </select>
-              <select value={filters.priority} onChange={(event) => setFilters((current) => ({ ...current, priority: event.target.value }))}>
+              </FilterSelect>
+              <FilterSelect
+                value={filters.priority}
+                onChange={(e) => setFilters((c) => ({ ...c, priority: e.target.value }))}
+              >
                 <option value="">All Priorities</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-              <select value={filters.sortBy} onChange={(event) => setFilters((current) => ({ ...current, sortBy: event.target.value }))}>
-                <option value="createdAt">Created</option>
-                <option value="dueDate">Due Date</option>
-                <option value="priority">Priority</option>
-              </select>
-              <select value={filters.order} onChange={(event) => setFilters((current) => ({ ...current, order: event.target.value }))}>
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
-              </select>
-            </Toolbar>
-            <div style={{ display: 'grid', gap: '16px', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
-              <TaskColumn
-                title="To Do"
-                tasks={groupedTasks.todo}
-                emptyLabel="No tasks in To Do yet."
-                onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
-                onDelete={handleDeleteTask}
-                onMove={handleMoveTask}
-                onSelect={setSelectedTask}
-              />
-              <TaskColumn
-                title="In Progress"
-                tasks={groupedTasks['in-progress']}
-                emptyLabel="No tasks in progress."
-                onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
-                onDelete={handleDeleteTask}
-                onMove={handleMoveTask}
-                onSelect={setSelectedTask}
-              />
-              <TaskColumn
-                title="Done"
-                tasks={groupedTasks.done}
-                emptyLabel="Nothing completed yet."
-                onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
-                onDelete={handleDeleteTask}
-                onMove={handleMoveTask}
-                onSelect={setSelectedTask}
-              />
-            </div>
+                <option value="low">🟢 Low</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="high">🔴 High</option>
+              </FilterSelect>
+              <FilterSelect
+                value={filters.sortBy}
+                onChange={(e) => setFilters((c) => ({ ...c, sortBy: e.target.value }))}
+              >
+                <option value="createdAt">Sort: Created</option>
+                <option value="dueDate">Sort: Due Date</option>
+                <option value="priority">Sort: Priority</option>
+              </FilterSelect>
+              <FilterSelect
+                value={filters.order}
+                onChange={(e) => setFilters((c) => ({ ...c, order: e.target.value }))}
+              >
+                <option value="desc">↓ Newest</option>
+                <option value="asc">↑ Oldest</option>
+              </FilterSelect>
+            </FilterBar>
           </Stack>
         ) : null}
-      </Section>
+      </BoardHeaderSection>
+
+      {currentBoard ? (
+        <ColumnGrid>
+          <TaskColumn
+            title="To Do"
+            tasks={groupedTasks.todo}
+            emptyLabel="No tasks here yet."
+            onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
+            onDelete={handleDeleteTask}
+            onMove={handleMoveTask}
+            onSelect={setSelectedTask}
+          />
+          <TaskColumn
+            title="In Progress"
+            tasks={groupedTasks['in-progress']}
+            emptyLabel="Nothing in progress."
+            onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
+            onDelete={handleDeleteTask}
+            onMove={handleMoveTask}
+            onSelect={setSelectedTask}
+          />
+          <TaskColumn
+            title="Done"
+            tasks={groupedTasks.done}
+            emptyLabel="Nothing completed yet."
+            onEdit={(task) => { setEditingTask(task); setTaskModalOpen(true); }}
+            onDelete={handleDeleteTask}
+            onMove={handleMoveTask}
+            onSelect={setSelectedTask}
+          />
+        </ColumnGrid>
+      ) : null}
 
       <CreateTaskModal
         open={taskModalOpen}
@@ -154,8 +244,6 @@ function BoardView() {
         onSave={handleSaveTask}
         onSuggest={suggestEstimate}
       />
-
-
 
       <TaskDetailView
         open={Boolean(selectedTask)}
