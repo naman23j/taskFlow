@@ -26,9 +26,14 @@ const DialogTitle = styled.h2`
 
 const ButtonRow = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: flex-end;
   flex-wrap: wrap;
+
+  @media (max-width: 400px) {
+    flex-direction: column-reverse;
+    & > * { width: 100%; }
+  }
 `;
 
 function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
@@ -37,8 +42,8 @@ function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
   }
 
   return (
-    <ModalOverlay role="dialog" aria-modal="true" aria-labelledby="confirm-title">
-      <ModalCard style={{ maxWidth: '400px', padding: '28px' }}>
+    <ModalOverlay role="dialog" aria-modal="true" aria-labelledby="confirm-title" onClick={(e) => e.target === e.currentTarget && onCancel()}>
+      <ModalCard style={{ maxWidth: '400px' }}>
         <Stack style={{ gap: '20px' }}>
           <DialogHeader>
             <WarningIcon>
@@ -54,10 +59,10 @@ function ConfirmDialog({ open, title, message, onConfirm, onCancel }) {
             </div>
           </DialogHeader>
           <ButtonRow>
-            <Button type="button" $variant="secondary" onClick={onCancel} id="confirm-cancel-btn" style={{ minHeight: '40px' }}>
+            <Button type="button" $variant="secondary" onClick={onCancel} id="confirm-cancel-btn">
               Cancel
             </Button>
-            <Button type="button" $variant="danger" onClick={onConfirm} id="confirm-delete-btn" style={{ minHeight: '40px' }}>
+            <Button type="button" $variant="danger" onClick={onConfirm} id="confirm-delete-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
               </svg>

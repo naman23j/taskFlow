@@ -1,94 +1,68 @@
-import styled, { keyframes, css } from 'styled-components';
+import styled from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
-const appear = keyframes`
-  from { transform: scale(0.5) rotate(-30deg); opacity: 0; }
-  to { transform: scale(1) rotate(0deg); opacity: 1; }
-`;
-
-const ToggleButton = styled.button`
-  position: relative;
+/* Pill track — matches the reference image exactly */
+const Track = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  padding: 4px 6px 4px 10px;
+  border-radius: 999px;
   background: ${({ theme }) => theme.colors.surfaceAlt};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 50px;
-  padding: 8px 16px;
+  box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.border};
   cursor: pointer;
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.text};
-  overflow: hidden;
-  white-space: nowrap;
+  border: none;
+  transition: all 200ms ease;
+  user-select: none;
+  position: relative;
 
   &:hover {
-    background: ${({ theme }) => theme.colors.border};
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px ${({ theme }) => theme.colors.shadow};
-  }
-
-  &:active {
-    transform: translateY(0);
+    background: ${({ theme }) => theme.colors.surfaceHover};
+    box-shadow: 0 0 0 1.5px ${({ theme }) => theme.colors.borderStrong};
   }
 `;
 
-const IconWrapper = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  animation: ${appear} 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-size: 1rem;
+const Icon = styled.span`
+  font-size: 0.85rem;
+  line-height: 1;
+  transition: transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1);
 `;
 
-const Track = styled.span`
-  display: inline-flex;
-  width: 34px;
-  height: 18px;
-  background: ${({ $dark, theme }) => $dark ? 'rgba(139, 92, 246, 0.3)' : 'rgba(251, 191, 36, 0.3)'};
-  border-radius: 9px;
-  border: 1px solid ${({ $dark, theme }) => $dark ? 'rgba(139, 92, 246, 0.5)' : 'rgba(251, 191, 36, 0.5)'};
-  position: relative;
-  transition: all 300ms ease;
-  flex-shrink: 0;
-`;
-
+/* Sliding thumb inside the track */
 const Thumb = styled.span`
-  position: absolute;
-  top: 2px;
-  left: ${({ $dark }) => $dark ? 'calc(100% - 16px)' : '2px'};
-  width: 12px;
-  height: 12px;
+  display: block;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: ${({ $dark }) => $dark ? 'rgb(139, 92, 246)' : 'rgb(251, 191, 36)'};
-  transition: left 300ms cubic-bezier(0.34, 1.56, 0.64, 1), background 300ms ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+
+  background: ${({ $dark }) =>
+    $dark
+      ? 'linear-gradient(135deg, #5b6af0, #8b5cf6)'
+      : 'linear-gradient(135deg, #f59e0b, #fb923c)'};
+  box-shadow: ${({ $dark }) =>
+    $dark
+      ? '0 2px 10px rgba(91,106,240,0.5)'
+      : '0 2px 10px rgba(245,158,11,0.5)'};
 `;
 
 function ThemeToggle() {
-  const { themeName, toggleTheme } = useTheme();
-  const isDark = themeName === 'dark';
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   return (
-    <ToggleButton
+    <Track
       type="button"
       onClick={toggleTheme}
-      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      id="theme-toggle"
     >
-      <IconWrapper key={themeName}>
+      <Icon style={{ transform: isDark ? 'scale(0.8) rotate(-20deg)' : 'scale(1) rotate(0deg)' }}>
         {isDark ? '🌙' : '☀️'}
-      </IconWrapper>
-      <Track $dark={isDark}>
-        <Thumb $dark={isDark} />
-      </Track>
-    </ToggleButton>
+      </Icon>
+      <Thumb $dark={isDark} />
+    </Track>
   );
 }
 

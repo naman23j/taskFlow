@@ -4,7 +4,7 @@ import styled, { keyframes } from 'styled-components';
 import BoardCard from './BoardCard';
 import CreateBoardModal from './CreateBoardModal';
 import { useBoard } from '../../context/BoardContext';
-import { Button, Grid, PageShell, Section, Stack, SubtleText } from '../shared/ui';
+import { Button, PageShell, Stack, SubtleText } from '../shared/ui';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import ErrorAlert from '../shared/ErrorAlert';
 import ConfirmDialog from '../shared/ConfirmDialog';
@@ -14,9 +14,8 @@ const fadeUp = keyframes`
   to   { opacity: 1; transform: translateY(0); }
 `;
 
-/* Hero */
 const HeroSection = styled.div`
-  border-radius: 22px;
+  border-radius: 20px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: ${({ theme }) =>
     theme.name === 'dark'
@@ -24,33 +23,33 @@ const HeroSection = styled.div`
       : 'rgba(255, 255, 255, 0.75)'};
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 32px 28px;
+  padding: 28px 24px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 20px;
   flex-wrap: wrap;
   animation: ${fadeUp} 350ms ease both;
   box-shadow: 0 4px 28px -6px ${({ theme }) => theme.colors.shadow};
 
   @media (max-width: 600px) {
-    padding: 22px 18px;
-    flex-direction: column;
-    border-radius: 18px;
+    padding: 20px 16px;
+    border-radius: 16px;
+    gap: 16px;
   }
 `;
 
 const HeroLeft = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   flex: 1;
   min-width: 0;
 `;
 
 const PageTitle = styled.h1`
   margin: 0;
-  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  font-size: clamp(1.55rem, 4vw, 2.3rem);
   font-weight: 900;
   letter-spacing: -0.035em;
   line-height: 1.05;
@@ -65,20 +64,20 @@ const PageTitle = styled.h1`
 
 const StatsRow = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
 `;
 
 const StatPill = styled.div`
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 5px 12px;
   border-radius: 999px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: ${({ theme }) =>
     theme.name === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'};
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.muted};
   letter-spacing: 0.01em;
@@ -87,19 +86,19 @@ const StatPill = styled.div`
 const StatNum = styled.span`
   font-weight: 900;
   color: ${({ theme }) => theme.colors.text};
-  font-size: 0.88rem;
+  font-size: 0.85rem;
 `;
 
 const CreateBtn = styled.button`
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 22px;
+  gap: 7px;
+  padding: 10px 20px;
   border-radius: 14px;
   background: ${({ theme }) => theme.colors.primary};
   color: ${({ theme }) => (theme.name === 'dark' ? '#000' : '#fff')};
   border: none;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 180ms ease;
@@ -116,36 +115,50 @@ const CreateBtn = styled.button`
   }
 
   &:active { transform: translateY(0); }
+
+  @media (max-width: 400px) {
+    width: 100%;
+    justify-content: center;
+    border-radius: 12px;
+  }
 `;
 
-/* Board grid */
 const BoardGrid = styled.div`
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   animation: ${fadeUp} 350ms 80ms ease both;
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 `;
 
-/* Empty state */
 const EmptyWrap = styled.div`
-  border-radius: 22px;
+  border-radius: 20px;
   border: 2px dashed ${({ theme }) => theme.colors.border};
   background: ${({ theme }) =>
     theme.name === 'dark' ? 'rgba(9,9,11,0.5)' : 'rgba(255,255,255,0.6)'};
   backdrop-filter: blur(8px);
-  padding: 72px 32px;
+  padding: 60px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   text-align: center;
   animation: ${fadeUp} 350ms ease both;
+
+  @media (max-width: 480px) {
+    padding: 48px 20px;
+    border-radius: 16px;
+  }
 `;
 
 const EmptyIconWrap = styled.div`
-  width: 80px;
-  height: 80px;
-  border-radius: 22px;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: ${({ theme }) => theme.colors.surfaceAlt};
   display: grid;
@@ -191,20 +204,20 @@ function Dashboard() {
       <HeroSection>
         <HeroLeft>
           <PageTitle>My Boards</PageTitle>
-          <SubtleText style={{ maxWidth: '480px' }}>
+          <SubtleText style={{ maxWidth: '440px' }}>
             Organize your projects, track tasks, and get AI-powered time estimates in one place.
           </SubtleText>
           {!loading && boards.length > 0 && (
             <StatsRow>
               <StatPill>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
                 </svg>
                 <StatNum>{boards.length}</StatNum>
                 {boards.length === 1 ? 'board' : 'boards'}
               </StatPill>
               <StatPill>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
                 </svg>
                 <StatNum>{boards.reduce((a, b) => a + (b.taskCount || 0), 0)}</StatNum>
@@ -219,7 +232,7 @@ function Dashboard() {
           onClick={() => { setEditingBoard(null); setModalOpen(true); }}
           id="create-board-btn"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
           Create Board
@@ -229,7 +242,7 @@ function Dashboard() {
       <ErrorAlert message={error} />
 
       {loading ? (
-        <Stack style={{ justifyItems: 'center', padding: '56px 0', gap: '14px' }}>
+        <Stack style={{ justifyItems: 'center', padding: '48px 0', gap: '14px' }}>
           <LoadingSpinner />
           <SubtleText>Loading your boards…</SubtleText>
         </Stack>
@@ -248,12 +261,12 @@ function Dashboard() {
       ) : (
         <EmptyWrap>
           <EmptyIconWrap>
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" />
             </svg>
           </EmptyIconWrap>
           <div>
-            <h2 style={{ margin: '0 0 8px', fontSize: '1.3rem' }}>No boards yet</h2>
+            <h2 style={{ margin: '0 0 8px', fontSize: '1.25rem', fontWeight: 700 }}>No boards yet</h2>
             <SubtleText>Create your first board to start organizing work.</SubtleText>
           </div>
           <CreateBtn
@@ -261,7 +274,7 @@ function Dashboard() {
             onClick={() => setModalOpen(true)}
             id="create-first-board-btn"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Create your first board

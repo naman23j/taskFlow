@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { useBoard } from '../../context/BoardContext';
-import { Badge, Button, PageShell, Section, Stack, SubtleText, Toolbar, Select } from '../shared/ui';
+import { Badge, Button, PageShell, Section, Stack, SubtleText } from '../shared/ui';
 import LoadingSpinner from '../shared/LoadingSpinner';
 import ErrorAlert from '../shared/ErrorAlert';
 import CreateTaskModal from '../tasks/CreateTaskModal';
@@ -16,11 +16,15 @@ const BoardHeaderSection = styled(Section)`
       : 'linear-gradient(135deg, #ffffff 0%, #f4f4f5 100%)'};
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 600px) {
+    gap: 14px;
+  }
 `;
 
 const FilterBar = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   flex-wrap: wrap;
 `;
@@ -30,42 +34,114 @@ const FilterSelect = styled.select`
   background: ${({ theme }) => theme.colors.surface};
   color: ${({ theme }) => theme.colors.text};
   border-radius: 10px;
-  padding: 8px 14px;
-  font-size: 0.82rem;
+  padding: 7px 12px;
+  font-size: 0.8rem;
   font-weight: 600;
   outline: none;
   cursor: pointer;
   transition: all 150ms ease;
-  min-height: 36px;
+  min-height: 34px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 
   &:focus {
-    border-color: ${({ theme }) => theme.colors.text};
+    border-color: ${({ theme }) => theme.colors.accent};
   }
 
   option {
     background: ${({ theme }) => theme.colors.surface};
     color: ${({ theme }) => theme.colors.text};
   }
+
+  @media (max-width: 480px) {
+    flex: 1;
+    min-width: 120px;
+    font-size: 0.75rem;
+    padding: 6px 10px;
+  }
 `;
 
 const BoardTitle = styled.h1`
   margin: 0;
-  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-size: clamp(1.2rem, 3.5vw, 1.9rem);
   font-weight: 900;
   letter-spacing: -0.02em;
 `;
 
+const HeaderToolbar = styled.div`
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+
+  @media (max-width: 520px) {
+    flex-wrap: wrap;
+  }
+`;
+
+const BoardMeta = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+`;
+
 const ColumnGrid = styled.div`
   display: grid;
-  gap: 16px;
+  gap: 14px;
   grid-template-columns: repeat(3, 1fr);
 
   @media (max-width: 900px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: ${({ theme }) => theme.colors.border};
+      border-radius: 99px;
+    }
   }
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
+    overflow-x: visible;
+  }
+`;
+
+const AddTaskBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 18px;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => (theme.name === 'dark' ? '#000' : '#fff')};
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 180ms ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  &:hover {
+    opacity: 0.88;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px -4px ${({ theme }) => theme.colors.shadow};
+  }
+  &:active { transform: translateY(0); }
+
+  @media (max-width: 520px) {
+    width: 100%;
+    justify-content: center;
+    border-radius: 10px;
   }
 `;
 
@@ -137,24 +213,23 @@ function BoardView() {
         ) : null}
         <ErrorAlert message={error} />
         {currentBoard ? (
-          <Stack style={{ gap: '16px' }}>
-            <Toolbar>
-              <Stack style={{ gap: '6px' }}>
+          <Stack style={{ gap: '14px' }}>
+            <HeaderToolbar>
+              <BoardMeta>
                 <BoardTitle>{currentBoard.title}</BoardTitle>
-                <SubtleText>{currentBoard.description || 'No description provided.'}</SubtleText>
-              </Stack>
-              <Button
+                <SubtleText style={{ fontSize: '0.83rem' }}>{currentBoard.description || 'No description provided.'}</SubtleText>
+              </BoardMeta>
+              <AddTaskBtn
                 type="button"
                 onClick={() => { setEditingTask(null); setTaskModalOpen(true); }}
                 id="create-task-btn"
-                style={{ minHeight: '44px', minWidth: '130px' }}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
                 Add Task
-              </Button>
-            </Toolbar>
+              </AddTaskBtn>
+            </HeaderToolbar>
 
             <FilterBar>
               <Badge>

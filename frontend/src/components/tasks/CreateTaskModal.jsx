@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Button, FieldGroup, FormRow, Input, Label, ModalCard, ModalOverlay, Select, Stack, TextArea, Toolbar, SubtleText } from '../shared/ui';
+import { Button, FieldGroup, FormRow, Input, Label, ModalCard, ModalOverlay, Select, Stack, TextArea, SubtleText } from '../shared/ui';
 import ErrorAlert from '../shared/ErrorAlert';
 
 const ModalHeader = styled.div`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 `;
 
 const ModalTitle = styled.h2`
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: -0.01em;
 `;
@@ -21,8 +21,8 @@ const CloseButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background: transparent;
@@ -34,6 +34,7 @@ const CloseButton = styled.button`
   &:hover {
     background: ${({ theme }) => theme.colors.surfaceAlt};
     color: ${({ theme }) => theme.colors.text};
+    border-color: ${({ theme }) => theme.colors.borderStrong};
   }
 `;
 
@@ -49,7 +50,7 @@ const AISuggestionBox = styled.div`
 const AISuggestionHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-size: 0.82rem;
   font-weight: 700;
   color: #8b5cf6;
@@ -57,17 +58,61 @@ const AISuggestionHeader = styled.div`
 
 const AISuggestionText = styled.p`
   margin: 0;
-  font-size: 0.85rem;
-  color: ${({ theme }) => theme.colors.muted};
-  line-height: 1.5;
+  font-size: 0.83rem;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  line-height: 1.55;
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+    & > * { width: 100%; }
+  }
+`;
+
+const AIBtn = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.07);
+  color: #8b5cf6;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all 160ms ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: rgba(139, 92, 246, 0.14);
+    border-color: rgba(139, 92, 246, 0.6);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+  }
+`;
+
+const SpinAnim = styled.svg`
+  animation: spin 0.9s linear infinite;
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 `;
 
 function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }) {
@@ -97,9 +142,7 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
     }
   }, [open, initialTask]);
 
-  if (!open) {
-    return null;
-  }
+  if (!open) return null;
 
   const handleChange = (event) => {
     setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
@@ -136,18 +179,18 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
   };
 
   return (
-    <ModalOverlay>
+    <ModalOverlay onClick={(e) => e.target === e.currentTarget && onClose()}>
       <ModalCard>
         <Stack style={{ gap: '20px' }}>
           <ModalHeader>
-            <Stack style={{ gap: '4px' }}>
+            <Stack style={{ gap: '3px' }}>
               <ModalTitle>{initialTask ? 'Edit Task' : 'Create Task'}</ModalTitle>
-              <SubtleText style={{ fontSize: '0.82rem' }}>
-                Use the AI helper to get an estimate based on your task description.
+              <SubtleText style={{ fontSize: '0.79rem' }}>
+                Use AI Estimate to auto-fill effort and due date.
               </SubtleText>
             </Stack>
             <CloseButton type="button" onClick={onClose} aria-label="Close modal">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </CloseButton>
@@ -158,14 +201,30 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
               <ErrorAlert message={error} />
               <FieldGroup>
                 <Label>
-                  Task Title
-                  <Input name="title" value={form.title} onChange={handleChange} maxLength={200} placeholder="Write release notes" id="task-title" />
+                  Task Title *
+                  <Input
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                    maxLength={200}
+                    placeholder="e.g., Write release notes"
+                    id="task-title"
+                    required
+                  />
                 </Label>
                 <Label>
                   Description
-                  <TextArea name="description" value={form.description} onChange={handleChange} maxLength={1000} placeholder="Add context, requirements, or acceptance criteria…" id="task-description" />
+                  <TextArea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    maxLength={1000}
+                    placeholder="Add context, requirements, or acceptance criteria…"
+                    id="task-description"
+                    style={{ minHeight: '96px' }}
+                  />
                 </Label>
-                <FormRow $columns={3}>
+                <FormRow $columns={2}>
                   <Label>
                     Priority
                     <Select name="priority" value={form.priority} onChange={handleChange} id="task-priority">
@@ -178,18 +237,24 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
                     Due Date
                     <Input name="dueDate" type="date" value={form.dueDate} onChange={handleChange} id="task-due-date" />
                   </Label>
-                  <Label>
-                    Effort
-                    <Input name="estimatedEffort" value={form.estimatedEffort} onChange={handleChange} placeholder="e.g. 2h, M" id="task-effort" />
-                  </Label>
                 </FormRow>
+                <Label>
+                  Estimated Effort
+                  <Input
+                    name="estimatedEffort"
+                    value={form.estimatedEffort}
+                    onChange={handleChange}
+                    placeholder="e.g. 2h, 3 days, 1 sprint"
+                    id="task-effort"
+                  />
+                </Label>
               </FieldGroup>
 
               {suggestion ? (
                 <AISuggestionBox>
                   <AISuggestionHeader>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                     </svg>
                     AI Suggestion Applied
                   </AISuggestionHeader>
@@ -198,40 +263,38 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
               ) : null}
 
               <ButtonGroup>
-                <Button
+                <AIBtn
                   type="button"
-                  $variant="secondary"
                   onClick={handleSuggest}
                   disabled={suggesting || !form.title}
                   id="suggest-estimate-btn"
-                  style={{ minHeight: '42px' }}
                 >
                   {suggesting ? (
                     <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                      <SpinAnim width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                      </svg>
-                      Thinking...
+                      </SpinAnim>
+                      Thinking…
                     </>
                   ) : (
                     <>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                       </svg>
                       AI Estimate
                     </>
                   )}
-                </Button>
-                <Button type="button" $variant="secondary" onClick={onClose} id="cancel-task-btn" style={{ minHeight: '42px' }}>
+                </AIBtn>
+                <Button type="button" $variant="secondary" onClick={onClose} id="cancel-task-btn">
                   Cancel
                 </Button>
-                <Button type="submit" disabled={busy} id="save-task-btn" style={{ minHeight: '42px' }}>
+                <Button type="submit" disabled={busy || !form.title} id="save-task-btn">
                   {busy ? (
                     <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 1s linear infinite' }}>
+                      <SpinAnim width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                      </svg>
-                      Saving...
+                      </SpinAnim>
+                      Saving…
                     </>
                   ) : (
                     <>
@@ -247,7 +310,6 @@ function CreateTaskModal({ open, initialTask, onClose, onSave, onSuggest, busy }
           </form>
         </Stack>
       </ModalCard>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </ModalOverlay>
   );
 }

@@ -1,7 +1,7 @@
 const Board = require('../models/Board');
 const Task = require('../models/Task');
 const { asyncHandler, isValidDate } = require('../utils/helpers');
-const { suggestEstimate } = require('../utils/aiService');
+const { suggestEstimate, generateMockEstimate } = require('../utils/aiService');
 
 const allowedStatuses = ['todo', 'in-progress', 'done'];
 const allowedPriorities = ['low', 'medium', 'high'];
@@ -240,48 +240,39 @@ const deleteTask = asyncHandler(async (req, res) => {
 });
 
 const suggestTaskEstimate = asyncHandler(async (req, res) => {
+  console.log('[AI Estimate Flow] Controller: Incoming request body:', req.body);
   const { title, description = '' } = req.body;
 
   if (!title || !title.trim()) {
+    console.warn('[AI Estimate Flow] Controller: Bad Request - Title is required');
     return res.status(400).json({ success: false, message: 'Title is required' });
   }
 
+  let estimate;
   try {
-    const estimate = await suggestEstimate(title.trim(), description.trim());
-    if (!estimate) {
-      return res.status(503).json({
-        error: 'AI feature unavailable',
-        fallback: 'Manual estimate suggested',
-      });
-    }
-
-    const suggestedDueDate = estimate.suggestedDueDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
-
-    res.status(200).json({
-      estimatedEffort: estimate.estimatedEffort,
-      suggestedDueDate: suggestedDueDate.slice(0, 10),
-      reasoning: estimate.reasoning,
-    });
+    console.log('[AI Estimate Flow] Controller: Calling suggestEstimate()...');
+    estimate = await suggestEstimate(title.trim(), description.trim());
   } catch (error) {
-    if (error.code === 'AI_KEY_MISSING') {
-      return res.status(503).json({
-        error: 'AI feature unavailable',
-        fallback: 'Manual estimate suggested',
-      });
-    }
-
-    if (error.code === 'AI_TIMEOUT') {
-      return res.status(503).json({
-        error: 'API timeout, please try again',
-        fallback: 'Manual estimate suggested',
-      });
-    }
-
-    return res.status(503).json({
-      error: 'Unable to generate estimate',
-      fallback: 'Manual estimate suggested',
-    });
+    console.error('[AI Estimate Flow] Controller: Exception caught from suggestEstimate:', error.message);
+    console.warn('[AI Estimate Flow] Controller: Generating mock fallback due to suggestEstimate exception.');
+    estimate = generateMockEstimate(title.trim(), description.trim());
   }
+
+  if (!estimate) {
+    console.warn('[AI Estimate Flow] Controller: suggestEstimate returned falsy value. Generating mock fallback.');
+    estimate = generateMockEstimate(title.trim(), description.trim());
+  }
+
+  const suggestedDueDate = estimate.suggestedDueDate || new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString();
+
+  const finalResponse = {
+    estimatedEffort: estimate.estimatedEffort,
+    suggestedDueDate: suggestedDueDate.slice(0, 10),
+    reasoning: estimate.reasoning,
+  };
+
+  console.log('[AI Estimate Flow] Controller: Final response sent to frontend:', finalResponse);
+  return res.status(200).json(finalResponse);
 });
 
 module.exports = {

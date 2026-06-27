@@ -20,7 +20,8 @@ export function ThemeProvider({ children }) {
       themeStyles: {
         appShell: {
           minHeight: '100vh',
-          padding: '24px 18px 48px',
+          paddingBottom: '48px',
+          overflow: 'hidden',
         },
       },
       theme,
