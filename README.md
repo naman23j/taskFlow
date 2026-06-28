@@ -144,7 +144,4 @@ No demo credentials are seeded by default. Register a new account locally to tes
 - `backend/` contains the Express API, models, controllers, routes, middleware, and AI helper.
 - `frontend/` contains the React app, route pages, contexts, services, and shared UI.
 
-## Notes for Submission
 
-- Replace the live demo placeholders with your deployed URLs.
-- Keep all secrets in `.env` files and out of version control.
