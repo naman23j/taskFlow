@@ -2,14 +2,6 @@
 
 TaskFlow is a lightweight Trello-style task and project management app built with the MERN stack. It includes JWT authentication, board/task CRUD, server-side ownership checks, and a backend-only AI estimate endpoint so task planning stays secure and centralized.
 
-## Screenshots
-
-Add screenshots for the following views before submission:
-- Login page
-- Dashboard board list
-- Board view with task columns
-- Mobile responsive view
-
 ## Tech Stack
 
 ### Frontend
@@ -30,7 +22,7 @@ Add screenshots for the following views before submission:
 - CORS, Helmet, dotenv
 
 ### AI
-- Google Gemini free tier via backend-only API calls
+- Google Gemini and Groq LLMs via backend-only API calls (defaults to Groq)
 
 ## Setup Instructions
 
@@ -86,7 +78,11 @@ npm run dev:frontend
 
 ## LLM API Choice
 
-This implementation uses Google Gemini because it has a practical free tier and supports structured backend requests. The API key never reaches the browser; the frontend only calls the local backend endpoint and the backend proxies the estimate request.
+This implementation supports both **Google Gemini** and **Groq** APIs:
+- **Groq (Default)**: Configured in `backend/.env.example` as the default provider, using `llama-3.1-8b-instant`.
+- **Google Gemini**: Supported using `gemini-2.0-flash` or similar.
+
+The API key never reaches the browser; the frontend only calls the local backend endpoint, and the backend proxies the estimate request.
 
 ## API Documentation
 
@@ -150,6 +146,5 @@ No demo credentials are seeded by default. Register a new account locally to tes
 
 ## Notes for Submission
 
-- Add screenshots before final delivery.
 - Replace the live demo placeholders with your deployed URLs.
 - Keep all secrets in `.env` files and out of version control.

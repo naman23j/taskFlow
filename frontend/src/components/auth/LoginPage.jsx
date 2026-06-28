@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import { Button, FieldGroup, Input, Label, Stack, SubtleText } from '../shared/ui';
-import authIllustration from '../../assets/auth_illustration.jpg';
+import authIllustration from '../../assets/auth_illustration.png';
 
 const rise = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -78,7 +78,7 @@ const ImageSide = styled.div`
   position: relative;
   order: ${({ $order }) => $order || 1};
   overflow: hidden;
-  background: #ffffff;
+  background: ${({ theme }) => theme.colors.surface};
 
   @media (max-width: 900px) {
     display: none;
