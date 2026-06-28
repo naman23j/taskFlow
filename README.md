@@ -145,8 +145,19 @@ No demo credentials are seeded by default. Register a new account locally to tes
 - `frontend/` contains the React app, route pages, contexts, services, and shared UI.
 
 <img width="953" height="507" alt="Screenshot 2026-06-28 202551" src="https://github.com/user-attachments/assets/9e9ca916-7fb2-4252-bbfa-1f118f9132ef" />
-<img width="953" height="507" alt="Screenshot 2026-06-28 202551" src="https://github.com/user-attachments/assets/a64a1265-2c3e-4158-8b57-f59de16f3bb4" />
-<img width="953" height="507" alt="Screenshot 2026-06-28 202551" src="https://github.com/user-attachments/assets/3b98d2e9-fda1-4e01-bc11-ec2d98cfee9d" />
-<img width="953" height="507" alt="Screenshot 2026-06-28 202551" src="https://github.com/user-attachments/assets/b904923f-ac08-4b45-8408-a7f6ba63a967" />
+<img width="959" height="500" alt="Screenshot 2026-06-28 202607" src="https://github.com/user-attachments/assets/1d2d09d8-888b-4275-908d-4a23ef039b1e" />
+<img width="952" height="503" alt="Screenshot 2026-06-28 202726" src="https://github.com/user-attachments/assets/88a1afa4-74f2-4879-9e4f-db3997ae2373" />
+<img width="953" height="503" alt="Screenshot 2026-06-28 202741" src="https://github.com/user-attachments/assets/a2838310-ec20-4f91-947d-548c8050015e" />
+<img width="943" height="494" alt="Screenshot 2026-06-28 202755" src="https://github.com/user-attachments/assets/b6fbcfa5-8f4e-4aa9-997a-ecd3ddbd8954" />
+<img width="343" height="414" alt="Screenshot 2026-06-28 202921" src="https://github.com/user-attachments/assets/660eb5f6-4a46-4ccb-a0df-78ec7727c515" />
+<img width="193" height="359" alt="Screenshot 2026-06-28 203043" src="https://github.com/user-attachments/assets/52659059-abcb-4e77-8cc2-3be4bc873dd2" />
+<img width="182" height="377" alt="image" src="https://github.com/user-attachments/assets/6d2529be-29c6-4a56-b51c-dc20a174f0e4" />
+
+
+
+
+
+
+
 
 
