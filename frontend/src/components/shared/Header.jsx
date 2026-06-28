@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
+import ProfileModal from '../auth/ProfileModal';
 
 const slideDown = keyframes`
   from { transform: translateY(-14px); opacity: 0; }
@@ -117,7 +119,7 @@ const ProfileChip = styled.div`
   gap: 7px;
   padding: 4px 10px 4px 4px;
   border-radius: 999px;
-  cursor: default;
+  cursor: pointer;
   transition: background 160ms ease;
   background: ${({ theme }) => theme.colors.surfaceAlt};
   box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.border};
@@ -184,7 +186,7 @@ const NavAction = styled.button`
   box-shadow: ${({ $primary, theme }) =>
     $primary
       ? `0 2px 12px -3px ${theme.colors.shadowMd}`
-      : `0 0 0 1px ${theme.colors.borderStrong}`};
+      : `0 0 0 1.5px ${theme.colors.borderStrong}`};
 
   &:hover {
     transform: translateY(-1px);
@@ -197,6 +199,26 @@ const NavAction = styled.button`
   }
 
   &:active { transform: translateY(0); }
+
+  /* Specifically style the logout button */
+  &#logout-btn {
+    border: none;
+    background: ${({ theme }) => theme.colors.surfaceAlt};
+    box-shadow: 0 0 0 1.5px ${({ theme }) => theme.colors.borderStrong};
+
+    &:hover {
+      background: ${({ theme }) => theme.colors.danger} !important;
+      color: #ffffff !important;
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4) !important;
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      background: #b91c1c !important;
+      transform: translateY(0) scale(0.97);
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3) !important;
+    }
+  }
 
   @media (max-width: 400px) {
     padding: 0 10px;
@@ -214,6 +236,7 @@ const LogoutLabel = styled.span`
 function Header() {
   const navigate = useNavigate();
   const { user, isAuthenticated, logout } = useAuth();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -235,7 +258,7 @@ function Header() {
         <RightCluster>
           {isAuthenticated && user?.name ? (
             <>
-              <ProfileChip title={user.name}>
+              <ProfileChip title={user.name} onClick={() => setIsProfileOpen(true)}>
                 <AvatarCircle>{initials}</AvatarCircle>
                 <UserName>{user.name}</UserName>
               </ProfileChip>
@@ -266,6 +289,7 @@ function Header() {
           )}
         </RightCluster>
       </NavBar>
+      <ProfileModal open={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
     </Shell>
   );
 }

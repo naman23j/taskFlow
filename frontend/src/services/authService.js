@@ -32,9 +32,21 @@ async function getMe() {
   return response.data;
 }
 
+async function updateProfile(data) {
+  const response = await api.patch('/auth/profile', data);
+  return response.data;
+}
+
+async function getStats() {
+  const response = await api.get('/auth/stats');
+  return response.data;
+}
+
 export default {
   register,
   login,
   logout,
   getMe,
+  updateProfile,
+  getStats,
 };

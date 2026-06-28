@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Header from './components/shared/Header';
 import NotFound from './components/404/NotFound';
@@ -11,11 +11,25 @@ import { useTheme } from './context/ThemeContext';
 
 function App() {
   const { themeStyles } = useTheme();
+  const location = useLocation();
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+
+  const appShellStyle = isAuthPage
+    ? {
+        ...themeStyles.appShell,
+        paddingBottom: '0px',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflowY: 'auto',
+      }
+    : themeStyles.appShell;
 
   return (
     <>
       <GlobalStyles />
-      <div style={themeStyles.appShell}>
+      <div style={appShellStyle}>
         <Header />
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

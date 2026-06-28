@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Board = require('../models/Board');
+const Task = require('../models/Task');
 const { asyncHandler, isStrongPassword } = require('../utils/helpers');
 
 function createToken(user) {
@@ -107,9 +109,89 @@ const logout = asyncHandler(async (req, res) => {
   });
 });
 
+const getStats = asyncHandler(async (req, res) => {
+  const userId = req.user.userId;
+
+  const boardsCount = await Board.countDocuments({ owner: userId });
+  const totalTasksCount = await Task.countDocuments({ owner: userId });
+  const todoCount = await Task.countDocuments({ owner: userId, status: 'todo' });
+  const inProgressCount = await Task.countDocuments({ owner: userId, status: 'in-progress' });
+  const doneCount = await Task.countDocuments({ owner: userId, status: 'done' });
+
+  res.status(200).json({
+    success: true,
+    stats: {
+      boardsCount,
+      tasks: {
+        total: totalTasksCount,
+        todo: todoCount,
+        inProgress: inProgressCount,
+        done: doneCount,
+      },
+    },
+  });
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const userId = req.user.userId;
+  const { name, currentPassword, newPassword, newPasswordConfirm } = req.body;
+
+  const user = await User.findById(userId).select('+passwordHash');
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
+
+  // 1. If password details are provided, validate and update password
+  if (currentPassword || newPassword || newPasswordConfirm) {
+    if (!currentPassword || !newPassword || !newPasswordConfirm) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password, new password, and confirmation are required to change password',
+      });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Incorrect current password' });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return res.status(400).json({ success: false, message: 'New passwords do not match' });
+    }
+
+    if (!isStrongPassword(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 8 characters and include uppercase, lowercase, and a number',
+      });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+  }
+
+  // 2. If name is provided, update it
+  if (name) {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      return res.status(400).json({ success: false, message: 'Name cannot be empty' });
+    }
+    user.name = trimmedName;
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Profile updated successfully',
+    user: sanitizeUser(user),
+  });
+});
+
 module.exports = {
   register,
   login,
   me,
   logout,
+  getStats,
+  updateProfile,
 };

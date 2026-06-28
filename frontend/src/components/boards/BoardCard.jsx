@@ -8,14 +8,14 @@ const slideIn = keyframes`
 const Shell = styled.article`
   animation: ${slideIn} 300ms ease both;
   border-radius: 20px;
-  background: ${({ theme }) => theme.colors.surface};
+  background: #ffffff;
   box-shadow:
-    0 0 0 1px ${({ theme }) => theme.colors.border},
-    0 2px 16px -4px ${({ theme }) => theme.colors.shadow};
-  padding: 20px;
+    0 0 0 1px #e5e7eb,
+    0 2px 16px -4px rgba(0, 0, 0, 0.1);
+  padding: 32px 22px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 28px;
   cursor: default;
   position: relative;
   overflow: hidden;
@@ -28,9 +28,9 @@ const Shell = styled.article`
     inset: 0 0 auto 0;
     height: 2.5px;
     background: ${({ theme }) =>
-      theme.name === 'dark'
-        ? 'linear-gradient(90deg, #7c8cf8, #a78bfa)'
-        : 'linear-gradient(90deg, #5b6af0, #7c8cf8)'};
+    theme.name === 'dark'
+      ? 'linear-gradient(90deg, #7c8cf8, #a78bfa)'
+      : 'linear-gradient(90deg, #5b6af0, #7c8cf8)'};
     opacity: 0;
     transition: opacity 220ms ease;
     border-radius: 20px 20px 0 0;
@@ -39,8 +39,8 @@ const Shell = styled.article`
   &:hover {
     transform: translateY(-3px);
     box-shadow:
-      0 0 0 1px ${({ theme }) => theme.colors.borderStrong},
-      0 12px 36px -8px ${({ theme }) => theme.colors.shadowMd};
+      0 0 0 1px #d1d5db,
+      0 12px 36px -8px rgba(0, 0, 0, 0.15);
 
     &::before { opacity: 1; }
   }
@@ -52,7 +52,7 @@ const Top = styled.div`
   gap: 14px;
 `;
 
-/* Board icon — subtle gradient tile */
+/* Board icon — subtle light gradient tile */
 const BoardIcon = styled.div`
   display: grid;
   place-items: center;
@@ -60,19 +60,13 @@ const BoardIcon = styled.div`
   height: 44px;
   border-radius: 13px;
   flex-shrink: 0;
-  background: ${({ theme }) =>
-    theme.name === 'dark'
-      ? 'linear-gradient(145deg, #1e2230, #252a38)'
-      : 'linear-gradient(145deg, #f1f3f5, #e2e6ea)'};
-  color: ${({ theme }) => theme.colors.muted};
+  background: linear-gradient(145deg, #f3f4f6, #e5e7eb);
+  color: #4b5563;
   transition: all 200ms ease;
 
   ${Shell}:hover & {
-    background: ${({ theme }) =>
-      theme.name === 'dark'
-        ? 'linear-gradient(145deg, #2a2f42, #333a55)'
-        : 'linear-gradient(145deg, #e4e8f0, #d0d6e2)'};
-    color: ${({ theme }) => theme.colors.accent};
+    background: linear-gradient(145deg, #e5e7eb, #d1d5db);
+    color: #111827;
   }
 `;
 
@@ -91,19 +85,20 @@ const Title = styled.h3`
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+  color: #000000;
 `;
 
 const Desc = styled.p`
   margin: 0;
   font-size: 0.8rem;
-  color: ${({ theme }) => theme.colors.muted};
+  color: #4b5563;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.4;
 `;
 
-/* Task count pill — exactly like the chips in the reference image */
+/* Task count pill */
 const CountPill = styled.span`
   display: inline-flex;
   align-items: center;
@@ -112,9 +107,9 @@ const CountPill = styled.span`
   border-radius: 999px;
   font-size: 0.74rem;
   font-weight: 700;
-  color: ${({ theme }) => theme.colors.muted};
-  background: ${({ theme }) => theme.colors.surfaceAlt};
-  box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.border};
+  color: #4b5563;
+  background: #f3f4f6;
+  box-shadow: 0 0 0 1px #e5e7eb;
   white-space: nowrap;
   flex-shrink: 0;
   font-family: 'Plus Jakarta Sans', sans-serif;
@@ -135,8 +130,8 @@ const OpenBtn = styled.button`
   gap: 7px;
   border-radius: 999px;
   border: none;
-  background: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => (theme.name === 'dark' ? '#0d0f12' : '#fff')};
+  background: #111827;
+  color: #ffffff;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.82rem;
   font-weight: 700;
@@ -147,9 +142,9 @@ const OpenBtn = styled.button`
   letter-spacing: 0.01em;
 
   &:hover {
-    opacity: 0.88;
+    background: #1f2937;
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px -4px ${({ theme }) => theme.colors.shadowMd};
+    box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.2);
   }
   &:active { transform: translateY(0); }
 `;
@@ -165,19 +160,15 @@ const RoundIconBtn = styled.button`
   cursor: pointer;
   transition: all 160ms ease;
   flex-shrink: 0;
-  color: ${({ $danger, theme }) => $danger ? theme.colors.danger : theme.colors.muted};
-  background: ${({ $danger, theme }) =>
-    $danger ? theme.colors.dangerBg : theme.colors.surfaceAlt};
-  box-shadow: 0 0 0 1px ${({ $danger, theme }) =>
-    $danger ? 'rgba(220,38,38,0.2)' : theme.colors.border};
+  color: ${({ $danger }) => $danger ? '#dc2626' : '#4b5563'};
+  background: ${({ $danger }) => $danger ? '#fee2e2' : '#f3f4f6'};
+  box-shadow: 0 0 0 1px ${({ $danger }) => $danger ? 'rgba(220,38,38,0.25)' : '#e5e7eb'};
 
   &:hover {
-    background: ${({ $danger, theme }) =>
-      $danger ? 'rgba(220,38,38,0.18)' : theme.colors.surfaceHover};
-    box-shadow: 0 0 0 1.5px ${({ $danger, theme }) =>
-      $danger ? 'rgba(220,38,38,0.4)' : theme.colors.borderStrong};
+    background: ${({ $danger }) => $danger ? '#fca5a5' : '#e5e7eb'};
+    box-shadow: 0 0 0 1.5px ${({ $danger }) => $danger ? '#dc2626' : '#9ca3af'};
     transform: scale(1.06);
-    color: ${({ $danger, theme }) => $danger ? theme.colors.danger : theme.colors.text};
+    color: ${({ $danger }) => $danger ? '#b91c1c' : '#111827'};
   }
 
   &:active { transform: scale(1); }

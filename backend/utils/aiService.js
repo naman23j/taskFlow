@@ -1,15 +1,19 @@
 const axios = require('axios');
 
 function buildEstimatePrompt(title, description) {
+  const future = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   return [
-    'Estimate effort and due date for this task.',
-    'Return JSON with effort, dueDate, reasoning.',
-    `Title: ${title}`,
-    `Description: ${description || 'No description provided'}`,
-    'Effort should be one of S, M, L or a short hours-based value like 2h, 5h, 1d.',
-    'Due date should be a date 1-7 days from now in ISO format.',
+    'You are a task estimation assistant. Return ONLY a valid JSON object — no markdown, no code fences, no extra text.',
+    'The JSON must have exactly these keys:',
+    '  "effort": one of "S" (under 2h), "M" (2-8h), or "L" (1-3 days)',
+    `  "dueDate": an ISO date string like "${future}"`,
+    '  "reasoning": a single sentence explaining the estimate',
+    '',
+    `Task Title: ${title}`,
+    `Task Description: ${description || 'No description provided'}`,
   ].join('\n');
 }
+
 
 function parseAiResponse(content) {
   if (!content) {
@@ -17,13 +21,54 @@ function parseAiResponse(content) {
     return null;
   }
 
-  const jsonMatch = content.match(/\{[\s\S]*\}/);
-  const payload = jsonMatch ? jsonMatch[0] : content;
+  // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
+  let cleaned = content.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
+
+  // Extract the first JSON object found
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  const payload = jsonMatch ? jsonMatch[0] : cleaned;
+
   try {
     const parsed = JSON.parse(payload);
+
+    // Effort may be a nested object {low, medium, high} — pick 'medium' as default
+    let effort = parsed.effort || parsed.estimatedEffort || parsed.estimated_effort || 'M';
+    if (typeof effort === 'object' && effort !== null) {
+      effort = 'M'; // normalise nested effort objects to medium
+    }
+    // Normalise single-char S/M/L or short strings
+    if (typeof effort === 'string' && effort.length > 4) {
+      effort = 'M';
+    }
+
+    // Normalise due date
+    let rawDate = parsed.dueDate || parsed.suggestedDueDate || parsed.due_date || parsed.date || null;
+    let suggestedDueDate = null;
+    if (rawDate && typeof rawDate === 'string') {
+      // If it already looks like a YYYY-MM-DD ISO date, use it directly
+      const isoMatch = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoMatch) {
+        const candidate = new Date(rawDate);
+        const now = new Date();
+        const maxDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        if (candidate > now && candidate <= maxDate) {
+          // Valid near-future date — use as-is
+          suggestedDueDate = rawDate;
+        } else {
+          // Out of range (past or >30 days) — default to 3 days from now
+          suggestedDueDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        }
+      } else {
+        // Relative string like "1-3 days" — extract the first small number
+        const daysMatch = rawDate.match(/\b([1-9]|[12]\d|30)\b/);
+        const days = daysMatch ? parseInt(daysMatch[1], 10) : 3;
+        suggestedDueDate = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      }
+    }
+
     const result = {
-      estimatedEffort: parsed.effort || parsed.estimatedEffort || parsed.estimated_effort || parsed.effort_estimate || 'M',
-      suggestedDueDate: parsed.dueDate || parsed.suggestedDueDate || parsed.due_date || parsed.suggested_due_date || parsed.date || null,
+      estimatedEffort: effort,
+      suggestedDueDate,
       reasoning: parsed.reasoning || parsed.explanation || 'AI estimate generated successfully.',
     };
     console.log('[AI Estimate Flow] parseAiResponse successfully parsed payload. Result:', result);
@@ -33,6 +78,7 @@ function parseAiResponse(content) {
     return null;
   }
 }
+
 
 function generateMockEstimate(title, description) {
   const text = `${title} ${description || ''}`.toLowerCase();
